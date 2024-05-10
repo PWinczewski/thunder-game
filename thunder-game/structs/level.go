@@ -2,7 +2,6 @@ package structs
 
 import (
 	"math/rand"
-	"time"
 )
 
 type Level struct {
@@ -12,9 +11,7 @@ type Level struct {
 	Board         [][]*Tile
 }
 
-func (l *Level) generateBoard() {
-	rand.Seed(time.Now().UnixNano())
-
+func (l *Level) generateBoard(rng *rand.Rand) {
 	board := make([][]*Tile, l.boardHeight)
 	for i := range board {
 		board[i] = make([]*Tile, l.boardWidth)
@@ -27,7 +24,7 @@ func (l *Level) generateBoard() {
 	}
 
 	// Generate a set of unique random numbers
-	nums := rand.Perm(l.boardWidth * l.boardHeight)[:int(float64(l.boardWidth*l.boardHeight)*l.forestDensity)]
+	nums := rng.Perm(l.boardWidth * l.boardHeight)[:int(float64(l.boardWidth*l.boardHeight)*l.forestDensity)]
 
 	// Assign structs to random indices in the 2D array
 	for _, num := range nums {
@@ -51,12 +48,12 @@ func (l *Level) GetTilesOnFire() []*Tile {
 	return tilesOnFire
 }
 
-func NewLevel(boardWidth int, boardHeight int, forestDensity float64) *Level {
+func NewLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand.Rand) *Level {
 	l := &Level{
 		boardWidth:    boardWidth,
 		boardHeight:   boardHeight,
 		forestDensity: forestDensity,
 	}
-	l.generateBoard()
+	l.generateBoard(rng)
 	return l
 }
