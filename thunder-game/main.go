@@ -14,20 +14,21 @@ import (
 )
 
 const (
-	title         string = "Thunder"
-	windowWidth   int    = 1024
-	windowHeight  int    = 1024
-	logicalWidth  int    = 800
-	logicalHeight int    = 800
-	tileSize      int    = 16
+	title              string = "Thunder"
+	windowWidth        int    = 1024
+	windowHeight       int    = 1024
+	logicalWidth       int    = 800
+	logicalHeight      int    = 800
+	tileSize           int    = 8
+	fireSpreadInterval int    = 3
 )
 
 var (
 	colorBackground = color.Gray{Y: 128}
 	colorFire       = color.RGBA{231, 36, 6, 255}
 
-	boardWidth  = 32
-	boardHeight = 32
+	boardWidth  = 64
+	boardHeight = 64
 
 	boardPixelWidth  = boardWidth * tileSize
 	boardPixelHeight = boardHeight * tileSize
@@ -35,7 +36,7 @@ var (
 	middleOffsetX = (logicalWidth - boardPixelWidth) / 2
 	middleOffsetY = (logicalHeight - boardPixelHeight) / 2
 
-	forestDensity = 0.7
+	forestDensity = 0.6
 )
 
 type Game struct {
@@ -60,7 +61,7 @@ func (g *Game) Update() error {
 
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.Key('R')) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		g.currentLevel = structs.NewLevel(boardHeight, boardWidth, forestDensity, g.rng)
 	}
 
@@ -122,7 +123,6 @@ func main() {
 	rng := rand.New(source)
 
 	initLevel := structs.NewLevel(boardHeight, boardWidth, forestDensity, rng)
-	fireSpreadInterval := 15
 
 	if err := ebiten.RunGame(&Game{currentLevel: initLevel, fireSpreadInterval: fireSpreadInterval, rng: rng}); err != nil {
 		log.Fatal(err)

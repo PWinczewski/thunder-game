@@ -43,7 +43,7 @@ func (t *Tile) Ignite(rng *rand.Rand) {
 }
 
 func initTileForest(x, y int) *Tile {
-	return &Tile{Forest, true, false, ColorForest, 0.1, 5, x, y}
+	return &Tile{Forest, true, false, ColorForest, 0, 5, x, y}
 }
 
 func initTileBarren(x, y int) *Tile {
