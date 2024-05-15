@@ -40,14 +40,16 @@ var (
 )
 
 type Game struct {
-	currentLevel       *structs.Level
-	fireSpreadInterval int
-	fireSpreadClock    int
-	rng                *rand.Rand
+	currentLevel *structs.Level
+	rng          *rand.Rand
+	loop         []GameLoop{}
+}
+
+type GameLoop interface {
+	Step()
 }
 
 func (g *Game) Update() error {
-	g.fireSpreadClock++
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
 		x, y := ebiten.CursorPosition()
@@ -62,28 +64,11 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		g.currentLevel = structs.NewLevel(boardHeight, boardWidth, forestDensity, g.rng)
+		g.currentLevel = structs.InitLevel(boardHeight, boardWidth, forestDensity, g.rng, fireSpreadInterval)
 	}
 
-	if g.fireSpreadInterval == g.fireSpreadClock {
-		g.fireSpreadClock = 0
-		for _, t := range g.currentLevel.GetTilesOnFire() {
-			if t.OnFire {
-				if t.Y-1 >= 0 {
-					g.currentLevel.Board[t.Y-1][t.X].Ignite(g.rng)
-				}
-				if t.X+1 < len(g.currentLevel.Board[0]) {
-					g.currentLevel.Board[t.Y][t.X+1].Ignite(g.rng)
-				}
-				if t.Y+1 < len(g.currentLevel.Board) {
-					g.currentLevel.Board[t.Y+1][t.X].Ignite(g.rng)
-				}
-				if t.X-1 >= 0 {
-					g.currentLevel.Board[t.Y][t.X-1].Ignite(g.rng)
-				}
-				g.currentLevel.Board[t.Y][t.X] = structs.InitTileBurned(t.X, t.Y)
-			}
-		}
+	for _, instance := range g.loop {
+		instance.Step()
 	}
 
 	return nil
@@ -94,12 +79,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for y, row := range g.currentLevel.Board {
 		for x, tile := range row {
-			var clr color.Color
-
+			clr := tile.Clr
 			if tile.OnFire {
 				clr = colorFire
-			} else {
-				clr = tile.Clr
 			}
 
 			for i := 0; i < tileSize; i++ {
@@ -122,9 +104,9 @@ func main() {
 	source := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(source)
 
-	initLevel := structs.NewLevel(boardHeight, boardWidth, forestDensity, rng)
+	initLevel := structs.InitLevel(boardHeight, boardWidth, forestDensity, rng, fireSpreadInterval)
 
-	if err := ebiten.RunGame(&Game{currentLevel: initLevel, fireSpreadInterval: fireSpreadInterval, rng: rng}); err != nil {
+	if err := ebiten.RunGame(&Game{currentLevel: initLevel, rng: rng, loop: []interface{}{}}); err != nil {
 		log.Fatal(err)
 	}
 }
