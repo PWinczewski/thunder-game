@@ -1,4 +1,4 @@
-package structs
+package main
 
 import (
 	"math/rand"
@@ -26,10 +26,8 @@ func (l *Level) generateBoard(rng *rand.Rand) {
 		}
 	}
 
-	// Generate a set of unique random numbers
 	nums := rng.Perm(l.BoardWidth * l.BoardHeight)[:int(float64(l.BoardWidth*l.BoardHeight)*l.ForestDensity)]
 
-	// Assign structs to random indices in the 2D array
 	for _, num := range nums {
 		row := num / l.BoardHeight
 		col := num % l.BoardWidth

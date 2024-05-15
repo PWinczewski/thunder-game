@@ -1,4 +1,4 @@
-package structs
+package main
 
 import (
 	"image/color"
@@ -22,7 +22,7 @@ var (
 	ColorMeadow     = color.RGBA{30, 200, 75, 255}
 	ColorBarren     = color.RGBA{67, 58, 46, 255}
 	ColorSettlement = color.RGBA{90, 80, 46, 255}
-	ColorBurned     = color.RGBA{33, 4, 67, 255}
+	ColorBurned     = color.RGBA{50, 4, 67, 255}
 )
 
 type Tile struct {
