@@ -29,7 +29,7 @@ func (l *Level) generateBoard(rng *rand.Rand) {
 	nums := rng.Perm(l.BoardWidth * l.BoardHeight)[:int(float64(l.BoardWidth*l.BoardHeight)*l.ForestDensity)]
 
 	for _, num := range nums {
-		row := num / l.BoardHeight
+		row := num / l.BoardWidth
 		col := num % l.BoardWidth
 		board[row][col] = initTileForest(col, row)
 	}

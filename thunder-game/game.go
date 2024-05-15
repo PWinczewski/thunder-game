@@ -24,7 +24,7 @@ func InitGame() *Game {
 	source := rand.NewSource(time.Now().UnixNano())
 	rng := rand.New(source)
 
-	initLevel := InitLevel(boardHeight, boardWidth, forestDensity, rng, fireSpreadInterval)
+	initLevel := InitLevel(boardWidth, boardHeight, forestDensity, rng, fireSpreadInterval)
 
 	return &Game{currentLevel: initLevel, rng: rng, loop: []GameLoop{initLevel}}
 }
