@@ -6,26 +6,27 @@ import (
 
 const (
 	title              string = "Thunder"
-	windowWidth        int    = 1024
-	windowHeight       int    = 1024
-	logicalWidth       int    = 800
-	logicalHeight      int    = 800
-	tileSize           int    = 4
-	fireSpreadInterval int    = 3
+	windowWidth        int    = 1280
+	windowHeight       int    = 720
+	internalWidth      int    = 640
+	internalHeight     int    = 360
+	tileSize           int    = 16
+	fireSpreadInterval int    = 8
 )
 
 var (
 	colorBackground = color.Gray{Y: 128}
-	colorFire       = color.RGBA{231, 36, 6, 255}
 
-	boardWidth  = 20
-	boardHeight = 50
+	boardWidth  = 32
+	boardHeight = 16
 
 	boardPixelWidth  = boardWidth * tileSize
 	boardPixelHeight = boardHeight * tileSize
 
-	middleOffsetX = (logicalWidth - boardPixelWidth) / 2
-	middleOffsetY = (logicalHeight - boardPixelHeight) / 2
+	middleBoardOffsetX = (internalWidth - boardPixelWidth) / 2
+	middleBoardOffsetY = (internalHeight - boardPixelHeight) / 2
 
 	forestDensity = 0.6
+
+	Fullscreen = false
 )

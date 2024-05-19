@@ -11,6 +11,7 @@ import (
 )
 
 type Game struct {
+	count        int
 	currentLevel *Level
 	rng          *rand.Rand
 	loop         []GameLoop
@@ -30,21 +31,27 @@ func InitGame() *Game {
 }
 
 func (g *Game) Update() error {
+	g.count++
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
 		x, y := ebiten.CursorPosition()
 
-		boardX, boardY := (x-middleOffsetX)/tileSize, (y-middleOffsetY)/tileSize
+		boardX, boardY := (x-middleBoardOffsetX)/tileSize, (y-middleBoardOffsetY)/tileSize
 
-		if boardX > 0 && boardX <= boardWidth && boardY > 0 && boardY <= boardHeight {
+		if boardX >= 0 && boardX < boardWidth && boardY >= 0 && boardY < boardHeight {
 			g.currentLevel.Board[boardY][boardX].Ignite(g.rng)
 		}
 		fmt.Printf("Mouse clicked at: %d, %d\n", boardX, boardY)
 
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyF10) {
+		Fullscreen = !Fullscreen
+		ebiten.SetFullscreen(Fullscreen)
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		g.currentLevel = InitLevel(boardHeight, boardWidth, forestDensity, g.rng, fireSpreadInterval)
+		g.currentLevel = InitLevel(boardWidth, boardHeight, forestDensity, g.rng, fireSpreadInterval)
 		g.loop = []GameLoop{g.currentLevel}
 	}
 
@@ -61,20 +68,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 	for y, row := range g.currentLevel.Board {
 		for x, tile := range row {
-			clr := tile.Clr
-			if tile.OnFire {
-				clr = colorFire
-			}
+			sprite := tile.Sprite
 
-			for i := 0; i < tileSize; i++ {
-				for j := 0; j < tileSize; j++ {
-					screen.Set(x*tileSize+i+middleOffsetX, y*tileSize+j+middleOffsetY, clr)
-				}
-			}
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64(middleBoardOffsetX+x*tileSize), float64(middleBoardOffsetY+y*tileSize))
+			screen.DrawImage(sprite, op)
 		}
 	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return logicalWidth, logicalHeight
+	return internalWidth, internalHeight
 }
