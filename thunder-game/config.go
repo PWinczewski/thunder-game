@@ -26,7 +26,10 @@ var (
 	middleBoardOffsetX = (internalWidth - boardPixelWidth) / 2
 	middleBoardOffsetY = (internalHeight - boardPixelHeight) / 2
 
-	forestDensity = 0.6
+	forestDensity    = 0.5
+	SpreadDirections = []struct{ dx, dy int }{
+		{-1, 0}, {1, 0}, {0, -1}, {0, 1},
+	}
 
 	Fullscreen = false
 )

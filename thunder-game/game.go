@@ -39,7 +39,7 @@ func (g *Game) Update() error {
 		boardX, boardY := (x-middleBoardOffsetX)/tileSize, (y-middleBoardOffsetY)/tileSize
 
 		if boardX >= 0 && boardX < boardWidth && boardY >= 0 && boardY < boardHeight {
-			g.currentLevel.Board[boardY][boardX].Ignite(g.rng)
+			g.currentLevel.Board[boardY][boardX].Ignite()
 		}
 		fmt.Printf("Mouse clicked at: %d, %d\n", boardX, boardY)
 
