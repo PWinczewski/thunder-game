@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 )
 
 type Level struct {
@@ -16,6 +17,12 @@ type Level struct {
 	FireSpreadInterval int
 	rng                *rand.Rand
 }
+
+type ByLength [][]*Tile
+
+func (a ByLength) Len() int           { return len(a) }
+func (a ByLength) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByLength) Less(i, j int) bool { return len(a[i]) < len(a[j]) }
 
 func (l *Level) Step() {
 	if l.FireSpreadInterval == l.FireSpreadClock {
@@ -91,6 +98,7 @@ func (l *Level) generateBoard(rng *rand.Rand) {
 	l.Board = board
 
 	clusters := l.findClusters(Forest)
+	sort.Sort(sort.Reverse(ByLength(clusters)))
 	fmt.Println(clusters)
 }
 
