@@ -99,7 +99,21 @@ func (l *Level) generateBoard(rng *rand.Rand) {
 
 	clusters := l.findClusters(Forest)
 	sort.Sort(sort.Reverse(ByLength(clusters)))
-	fmt.Println(clusters)
+
+	lengthsMap := make(map[int]int)
+	for _, arr := range clusters {
+		length := len(arr)
+		lengthsMap[length]++
+	}
+	keys := make([]int, 0, len(lengthsMap))
+	for length := range lengthsMap {
+		keys = append(keys, length)
+	}
+	sort.Ints(keys)
+
+	for _, length := range keys {
+		fmt.Printf("Length: %d, Count: %d\n", length, lengthsMap[length])
+	}
 }
 
 func (l *Level) findClusters(tileType TileType) [][]*Tile {
