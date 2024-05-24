@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
-	"sort"
 )
 
 type Level struct {
@@ -69,67 +67,46 @@ func InitLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand
 		FireSpreadInterval: fireSpreadInterval,
 		rng:                rng,
 	}
-	l.generateBoard(rng)
+	l.Board = l.generateBoard(rng)
+	l.DestructionTarget = l.getTargetDestruction()
 	return l
 }
 
-func (l *Level) generateBoard(rng *rand.Rand) {
+func (l *Level) generateBoard(rng *rand.Rand) [][]*Tile {
 	board := make([][]*Tile, l.BoardHeight)
 	forestTileCount := int(float64(l.BoardWidth*l.BoardHeight) * l.ForestDensity)
+	treeLocations := rng.Perm(l.BoardWidth * l.BoardHeight)[:forestTileCount]
 
 	for i := range board {
 		board[i] = make([]*Tile, l.BoardWidth)
-	}
-
-	for i := range board {
 		for j := range board[i] {
 			board[i][j] = initTileBarren(j, i)
 		}
 	}
 
-	nums := rng.Perm(l.BoardWidth * l.BoardHeight)[:forestTileCount]
-
-	for _, num := range nums {
-		row := num / l.BoardWidth
-		col := num % l.BoardWidth
+	for _, location := range treeLocations {
+		row := location / l.BoardWidth
+		col := location % l.BoardWidth
 		board[row][col] = initTileForest(col, row)
 	}
 
-	l.Board = board
+	return board
+}
 
+func (l *Level) getTargetDestruction() int {
 	clusters := l.findClusters(Forest)
-	sort.Sort(sort.Reverse(ByLength(clusters)))
 
-	lengthsMap := make(map[int]int)
+	clusterSizes := make([]int, 0, len(clusters))
 	for _, arr := range clusters {
-		length := len(arr)
-		lengthsMap[length]++
-	}
-	keys := make([]int, 0, len(lengthsMap))
-	for length := range lengthsMap {
-		keys = append(keys, length)
-	}
-	sort.Ints(keys)
-
-	lengthsArr := make([]int, 0, len(clusters))
-	for _, arr := range clusters {
-		length := len(arr)
-		if length > 2 {
-			lengthsArr = append(lengthsArr, length)
+		size := len(arr)
+		if size > 2 {
+			clusterSizes = append(clusterSizes, size)
 		}
 	}
 
-	fmt.Println(lengthsArr)
+	possibleSums := getPossibleSums(clusterSizes, 2, 3)
 
-	for _, length := range keys {
-		fmt.Printf("Length: %d, Count: %d\n", length, lengthsMap[length])
-	}
-
-	sums := getSumsRange(lengthsArr, 2, 3)
-	fmt.Println(sums)
-
-	target := getBestTarget(sums, 0.1)
-	fmt.Println(target)
+	return getBestTarget(possibleSums, 0.1)
 }
 
 func (l *Level) findClusters(tileType TileType) [][]*Tile {
@@ -171,7 +148,6 @@ func combinations(arr []int, X int) [][]int {
 	var result [][]int
 	var helper func(start int, path []int)
 
-	// Helper function for the backtracking algorithm
 	helper = func(start int, path []int) {
 		if len(path) == X {
 			comb := make([]int, X)
@@ -188,7 +164,7 @@ func combinations(arr []int, X int) [][]int {
 	return result
 }
 
-func getSumsRange(arr []int, Nmin int, Nmax int) map[int]int {
+func getPossibleSums(arr []int, Nmin int, Nmax int) map[int]int {
 	sumMap := make(map[int]int)
 
 	for k := Nmin; k <= Nmax; k++ {
@@ -217,7 +193,6 @@ func getBestTarget(targets map[int]int, tolerance float64) int {
 			}
 		}
 		if strength > targetStrength {
-			fmt.Println(target, targetStrength, t, strength)
 			targetStrength = strength
 			target = t
 		}

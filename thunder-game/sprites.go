@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,8 +33,6 @@ func LoadSprites() {
 		Sprites[name] = img
 		return nil
 	})
-
-	fmt.Println(Sprites["tileBurning"])
 
 	if err != nil {
 		log.Fatal(err)
