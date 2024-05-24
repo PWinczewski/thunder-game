@@ -111,9 +111,25 @@ func (l *Level) generateBoard(rng *rand.Rand) {
 	}
 	sort.Ints(keys)
 
+	lengthsArr := make([]int, 0, len(clusters))
+	for _, arr := range clusters {
+		length := len(arr)
+		if length > 2 {
+			lengthsArr = append(lengthsArr, length)
+		}
+	}
+
+	fmt.Println(lengthsArr)
+
 	for _, length := range keys {
 		fmt.Printf("Length: %d, Count: %d\n", length, lengthsMap[length])
 	}
+
+	sums := getSumsRange(lengthsArr, 2, 3)
+	fmt.Println(sums)
+
+	target := getBestTarget(sums, 0.1)
+	fmt.Println(target)
 }
 
 func (l *Level) findClusters(tileType TileType) [][]*Tile {
@@ -149,4 +165,62 @@ func (l *Level) findClusters(tileType TileType) [][]*Tile {
 		}
 	}
 	return clusters
+}
+
+func combinations(arr []int, X int) [][]int {
+	var result [][]int
+	var helper func(start int, path []int)
+
+	// Helper function for the backtracking algorithm
+	helper = func(start int, path []int) {
+		if len(path) == X {
+			comb := make([]int, X)
+			copy(comb, path)
+			result = append(result, comb)
+			return
+		}
+		for i := start; i < len(arr); i++ {
+			helper(i+1, append(path, arr[i]))
+		}
+	}
+
+	helper(0, []int{})
+	return result
+}
+
+func getSumsRange(arr []int, Nmin int, Nmax int) map[int]int {
+	sumMap := make(map[int]int)
+
+	for k := Nmin; k <= Nmax; k++ {
+		combs := combinations(arr, k)
+		for _, comb := range combs {
+			sum := 0
+			for _, num := range comb {
+				sum += num
+			}
+			sumMap[sum]++
+		}
+	}
+
+	return sumMap
+}
+
+func getBestTarget(targets map[int]int, tolerance float64) int {
+	target := 0
+	targetStrength := 0
+
+	for t := range targets {
+		strength := 0
+		for key, val := range targets {
+			if float64(key) <= float64(t)*(1+tolerance) && float64(key) >= float64(t)*(1-tolerance) {
+				strength += val
+			}
+		}
+		if strength > targetStrength {
+			fmt.Println(target, targetStrength, t, strength)
+			targetStrength = strength
+			target = t
+		}
+	}
+	return target
 }
