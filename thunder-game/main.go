@@ -11,6 +11,8 @@ func main() {
 	ebiten.SetWindowTitle("Thunder InDev")
 
 	LoadSprites()
+	LoadFonts()
+
 	ebiten.SetFullscreen(Fullscreen)
 
 	if err := ebiten.RunGame(InitGame()); err != nil {

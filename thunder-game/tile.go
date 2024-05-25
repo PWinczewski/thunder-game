@@ -33,7 +33,7 @@ func (t *Tile) Ignite() {
 }
 
 func initTileForest(x, y int) *Tile {
-	return &Tile{Forest, true, false, Sprites["tileForestv2"], 5, x, y}
+	return &Tile{Forest, true, false, Sprites["tileForestv2"], 1, x, y}
 }
 
 func initTileBarren(x, y int) *Tile {

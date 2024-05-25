@@ -1,19 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 )
 
 type Level struct {
-	BoardWidth         int
-	BoardHeight        int
-	ForestDensity      float64
-	DestructionTarget  int
-	Destruction        int
-	Board              [][]*Tile
-	FireSpreadClock    int
-	FireSpreadInterval int
-	rng                *rand.Rand
+	BoardWidth                 int
+	BoardHeight                int
+	ForestDensity              float64
+	DestructionTargetTolerance float64
+	DestructionTarget          int
+	Destruction                int
+	Board                      [][]*Tile
+	FireSpreadClock            int
+	FireSpreadInterval         int
+	rng                        *rand.Rand
 }
 
 type ByLength [][]*Tile
@@ -33,6 +35,7 @@ func (l *Level) Step() {
 					}
 				}
 				l.Board[t.Y][t.X] = InitTileBurned(t.X, t.Y)
+				l.Destruction += t.DestructionValue
 			}
 		}
 	}
@@ -59,16 +62,18 @@ func (l *Level) SafeArrayAccess(x, y int) (*Tile, bool) {
 	return nil, false
 }
 
-func InitLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand.Rand, fireSpreadInterval int) *Level {
+func InitLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand.Rand, fireSpreadInterval int, destructionTargetTolerance float64) *Level {
 	l := &Level{
-		BoardWidth:         boardWidth,
-		BoardHeight:        boardHeight,
-		ForestDensity:      forestDensity,
-		FireSpreadInterval: fireSpreadInterval,
-		rng:                rng,
+		BoardWidth:                 boardWidth,
+		BoardHeight:                boardHeight,
+		ForestDensity:              forestDensity,
+		FireSpreadInterval:         fireSpreadInterval,
+		rng:                        rng,
+		DestructionTargetTolerance: destructionTargetTolerance,
 	}
 	l.Board = l.generateBoard(rng)
 	l.DestructionTarget = l.getTargetDestruction()
+	fmt.Println(l.DestructionTarget)
 	return l
 }
 
@@ -99,14 +104,14 @@ func (l *Level) getTargetDestruction() int {
 	clusterSizes := make([]int, 0, len(clusters))
 	for _, arr := range clusters {
 		size := len(arr)
-		if size > 2 {
+		if size > 6 {
 			clusterSizes = append(clusterSizes, size)
 		}
 	}
 
-	possibleSums := getPossibleSums(clusterSizes, 2, 3)
+	possibleSums := getPossibleSums(clusterSizes, maxStrikes, maxStrikes)
 
-	return getBestTarget(possibleSums, 0.1)
+	return getBestTarget(possibleSums, l.DestructionTargetTolerance)
 }
 
 func (l *Level) findClusters(tileType TileType) [][]*Tile {

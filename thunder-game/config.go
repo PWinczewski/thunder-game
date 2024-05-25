@@ -17,19 +17,25 @@ const (
 var (
 	colorBackground = color.Gray{Y: 128}
 
-	boardWidth  = 32
-	boardHeight = 16
+	boardWidth  = 40
+	boardHeight = 18
 
 	boardPixelWidth  = boardWidth * tileSize
 	boardPixelHeight = boardHeight * tileSize
 
-	middleBoardOffsetX = (internalWidth - boardPixelWidth) / 2
-	middleBoardOffsetY = (internalHeight - boardPixelHeight) / 2
+	BoardOffsetX = (internalWidth - boardPixelWidth) / 2
+	BoardOffsetY = (internalHeight-boardPixelHeight)/2 - (internalHeight-tileSize*boardHeight)/2
 
 	forestDensity    = 0.5
 	SpreadDirections = []struct{ dx, dy int }{
 		{-1, 0}, {1, 0}, {0, -1}, {0, 1},
 	}
+
+	destructionTargetTolerance = 0.15
+
+	maxStrikes = 3
+
+	FontSizes = map[string]float64{"small": 16, "medium": 32, "large": 48}
 
 	Fullscreen = false
 )
