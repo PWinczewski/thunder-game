@@ -33,11 +33,11 @@ func (t *Tile) Ignite() {
 }
 
 func initTileForest(x, y int) *Tile {
-	return &Tile{Forest, true, false, Sprites["tileForestv2"], 1, x, y}
+	return &Tile{Forest, true, false, Sprites["tileForest"], 1, x, y}
 }
 
 func initTileBarren(x, y int) *Tile {
-	return &Tile{Barren, false, false, Sprites["tileBarrenv2"], 1, x, y}
+	return &Tile{Barren, false, false, Sprites["tileBarren"], 1, x, y}
 }
 
 // func initTileMountain(x, y int) *Tile {

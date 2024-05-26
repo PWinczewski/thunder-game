@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
+
+	"github.com/ojrac/opensimplex-go"
 )
 
 type Level struct {
@@ -13,6 +14,7 @@ type Level struct {
 	DestructionTarget          int
 	Destruction                int
 	Board                      [][]*Tile
+	Clusters                   [][]*Tile
 	FireSpreadClock            int
 	FireSpreadInterval         int
 	rng                        *rand.Rand
@@ -72,20 +74,32 @@ func InitLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand
 		DestructionTargetTolerance: destructionTargetTolerance,
 	}
 	l.Board = l.generateBoard(rng)
+	l.Clusters = l.findClusters(Forest)
+
+	for len(l.Clusters) < 2*maxStrikes {
+		l.Board = l.generateBoard(l.rng)
+		l.Clusters = l.findClusters(Forest)
+	}
+
 	l.DestructionTarget = l.getTargetDestruction()
-	fmt.Println(l.DestructionTarget)
+
 	return l
 }
 
 func (l *Level) generateBoard(rng *rand.Rand) [][]*Tile {
 	board := make([][]*Tile, l.BoardHeight)
+	noise := getNoiseHeightMap(int64(rng.Int63()))
 	forestTileCount := int(float64(l.BoardWidth*l.BoardHeight) * l.ForestDensity)
 	treeLocations := rng.Perm(l.BoardWidth * l.BoardHeight)[:forestTileCount]
 
 	for i := range board {
 		board[i] = make([]*Tile, l.BoardWidth)
 		for j := range board[i] {
-			board[i][j] = initTileBarren(j, i)
+			if noise[i*boardWidth+j] > noiseThreshold {
+				board[i][j] = initTileForest(j, i)
+			} else {
+				board[i][j] = initTileBarren(j, i)
+			}
 		}
 	}
 
@@ -94,17 +108,15 @@ func (l *Level) generateBoard(rng *rand.Rand) [][]*Tile {
 		col := location % l.BoardWidth
 		board[row][col] = initTileForest(col, row)
 	}
-
 	return board
 }
 
 func (l *Level) getTargetDestruction() int {
-	clusters := l.findClusters(Forest)
 
-	clusterSizes := make([]int, 0, len(clusters))
-	for _, arr := range clusters {
+	clusterSizes := make([]int, 0, len(l.Clusters))
+	for _, arr := range l.Clusters {
 		size := len(arr)
-		if size > 6 {
+		if size >= minimumClusterSizeForTarget {
 			clusterSizes = append(clusterSizes, size)
 		}
 	}
@@ -193,7 +205,7 @@ func getBestTarget(targets map[int]int, tolerance float64) int {
 	for t := range targets {
 		strength := 0
 		for key, val := range targets {
-			if float64(key) <= float64(t)*(1+tolerance) && float64(key) >= float64(t)*(1-tolerance) {
+			if float64(key) < float64(t)*(1+tolerance) && float64(key) > float64(t)*(1-tolerance) {
 				strength += val
 			}
 		}
@@ -203,4 +215,17 @@ func getBestTarget(targets map[int]int, tolerance float64) int {
 		}
 	}
 	return target
+}
+
+func getNoiseHeightMap(seed int64) []float64 {
+	noise := opensimplex.New(seed)
+	heightmap := make([]float64, boardWidth*boardHeight)
+	for y := 0; y < boardHeight; y++ {
+		for x := 0; x < boardWidth; x++ {
+			xFloat := float64(x) / float64(boardWidth)
+			yFloat := float64(y) / float64(boardHeight)
+			heightmap[(y*boardWidth)+x] = noise.Eval2(xFloat*noiseFrequency, yFloat*noiseFrequency)
+		}
+	}
+	return heightmap
 }
