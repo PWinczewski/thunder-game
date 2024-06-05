@@ -2,8 +2,6 @@ package main
 
 import (
 	"math/rand"
-
-	"github.com/ojrac/opensimplex-go"
 )
 
 type Level struct {
@@ -76,7 +74,7 @@ func InitLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand
 	l.Board = l.generateBoard(rng)
 	l.Clusters = l.findClusters(Forest)
 
-	for len(l.Clusters) < 2*maxStrikes {
+	for len(l.Clusters) < 5*maxStrikes {
 		l.Board = l.generateBoard(l.rng)
 		l.Clusters = l.findClusters(Forest)
 	}
@@ -88,26 +86,28 @@ func InitLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand
 
 func (l *Level) generateBoard(rng *rand.Rand) [][]*Tile {
 	board := make([][]*Tile, l.BoardHeight)
-	noise := getNoiseHeightMap(int64(rng.Int63()))
-	forestTileCount := int(float64(l.BoardWidth*l.BoardHeight) * l.ForestDensity)
-	treeLocations := rng.Perm(l.BoardWidth * l.BoardHeight)[:forestTileCount]
-
+	noiseOpenSimplex := getOpensimplexNoise(int64(rng.Int63()), int64(l.BoardWidth), int64(l.BoardHeight), noiseFrequency)
+	noiseWorley := getWorleyNoise(l.BoardWidth, l.BoardHeight, int(forestDensity))
+	// forestTileCount := int(float64(l.BoardWidth*l.BoardHeight) * l.ForestDensity)
+	// treeLocations := rng.Perm(l.BoardWidth * l.BoardHeight)[:forestTileCount]
 	for i := range board {
 		board[i] = make([]*Tile, l.BoardWidth)
 		for j := range board[i] {
-			if noise[i*boardWidth+j] > noiseThreshold {
+			if noiseWorley[i][j] < worleyThreshold || noiseOpenSimplex[i][j] > openSimplexThreshold {
 				board[i][j] = initTileForest(j, i)
+
 			} else {
 				board[i][j] = initTileBarren(j, i)
+
 			}
 		}
 	}
 
-	for _, location := range treeLocations {
-		row := location / l.BoardWidth
-		col := location % l.BoardWidth
-		board[row][col] = initTileForest(col, row)
-	}
+	// for _, location := range treeLocations {
+	// 	row := location / l.BoardWidth
+	// 	col := location % l.BoardWidth
+	// 	board[row][col] = initTileForest(col, row)
+	// }
 	return board
 }
 
@@ -215,17 +215,4 @@ func getBestTarget(targets map[int]int, tolerance float64) int {
 		}
 	}
 	return target
-}
-
-func getNoiseHeightMap(seed int64) []float64 {
-	noise := opensimplex.New(seed)
-	heightmap := make([]float64, boardWidth*boardHeight)
-	for y := 0; y < boardHeight; y++ {
-		for x := 0; x < boardWidth; x++ {
-			xFloat := float64(x) / float64(boardWidth)
-			yFloat := float64(y) / float64(boardHeight)
-			heightmap[(y*boardWidth)+x] = noise.Eval2(xFloat*noiseFrequency, yFloat*noiseFrequency)
-		}
-	}
-	return heightmap
 }

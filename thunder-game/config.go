@@ -30,11 +30,13 @@ var (
 		{-1, 0}, {1, 0}, {0, -1}, {0, 1},
 	}
 
-	forestDensity               = 0.0
-	noiseThreshold              = 0.1
+	forestDensity   = 0.0
+	worleyThreshold = 0.1
+
+	openSimplexThreshold        = 0.0
 	destructionTargetTolerance  = 0.15
 	minimumClusterSizeForTarget = 5
-	noiseFrequency              = 10.0
+	noiseFrequency              = 15.0
 
 	maxStrikes = 3
 
