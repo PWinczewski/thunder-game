@@ -56,8 +56,8 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF10) {
-		Fullscreen = !Fullscreen
-		ebiten.SetFullscreen(Fullscreen)
+		FullscreenToggle = !FullscreenToggle
+		ebiten.SetFullscreen(FullscreenToggle)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {

@@ -30,17 +30,34 @@ var (
 		{-1, 0}, {1, 0}, {0, -1}, {0, 1},
 	}
 
-	forestDensity   = 0.0
-	worleyThreshold = 0.1
+	forestDensity = 0.0 // for random approach
 
 	openSimplexThreshold        = 0.0
-	destructionTargetTolerance  = 0.15
+	destructionTargetTolerance  = 0.1
 	minimumClusterSizeForTarget = 5
 	noiseFrequency              = 15.0
 
-	maxStrikes = 3
+	ErodePatterns = [][3][3]int64{
+		{
+			{-1, 0, -1},
+			{1, 1, 1},
+			{-1, 0, -1},
+		},
+		{
+			{-1, 1, -1},
+			{0, 1, 0},
+			{-1, 1, -1},
+		},
+		{
+			{-1, 0, -1},
+			{0, 1, 0},
+			{-1, 0, -1},
+		},
+	}
+
+	maxStrikes = 5
 
 	FontSizes = map[string]float64{"small": 16, "medium": 32, "large": 48}
 
-	Fullscreen = false
+	FullscreenToggle = false
 )

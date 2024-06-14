@@ -86,22 +86,39 @@ func InitLevel(boardWidth int, boardHeight int, forestDensity float64, rng *rand
 
 func (l *Level) generateBoard(rng *rand.Rand) [][]*Tile {
 	board := make([][]*Tile, l.BoardHeight)
+	draftBoard := make([][]int64, l.BoardHeight)
 	noiseOpenSimplex := getOpensimplexNoise(int64(rng.Int63()), int64(l.BoardWidth), int64(l.BoardHeight), noiseFrequency)
-	noiseWorley := getWorleyNoise(l.BoardWidth, l.BoardHeight, int(forestDensity))
-	// forestTileCount := int(float64(l.BoardWidth*l.BoardHeight) * l.ForestDensity)
-	// treeLocations := rng.Perm(l.BoardWidth * l.BoardHeight)[:forestTileCount]
-	for i := range board {
-		board[i] = make([]*Tile, l.BoardWidth)
-		for j := range board[i] {
-			if noiseWorley[i][j] < worleyThreshold || noiseOpenSimplex[i][j] > openSimplexThreshold {
-				board[i][j] = initTileForest(j, i)
+
+	for i := range draftBoard {
+		draftBoard[i] = make([]int64, l.BoardWidth)
+		for j := range draftBoard[i] {
+			if noiseOpenSimplex[i][j] > openSimplexThreshold {
+				draftBoard[i][j] = 1
 
 			} else {
-				board[i][j] = initTileBarren(j, i)
+				draftBoard[i][j] = 0
 
 			}
 		}
 	}
+
+	draftBoard = MorphMatrix(draftBoard, ErodePatterns, 0, 2)
+
+	for i := range draftBoard {
+		board[i] = make([]*Tile, l.BoardWidth)
+		for j := range draftBoard[i] {
+			if draftBoard[i][j] == 1 {
+				board[i][j] = initTileForest(j, i)
+
+			} else {
+				board[i][j] = initTileBarren(j, i)
+			}
+		}
+	}
+
+	//random trees
+	// forestTileCount := int(float64(l.BoardWidth*l.BoardHeight) * l.ForestDensity)
+	// treeLocations := rng.Perm(l.BoardWidth * l.BoardHeight)[:forestTileCount]
 
 	// for _, location := range treeLocations {
 	// 	row := location / l.BoardWidth

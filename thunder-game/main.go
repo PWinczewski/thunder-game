@@ -13,7 +13,7 @@ func main() {
 	LoadSprites()
 	LoadFonts()
 
-	ebiten.SetFullscreen(Fullscreen)
+	ebiten.SetFullscreen(FullscreenToggle)
 
 	if err := ebiten.RunGame(InitGame()); err != nil {
 		log.Fatal(err)
